@@ -1,7 +1,8 @@
 from pyspark import SparkContext
 from pyspark import SparkConf
 
-import numpy as np
+# from io import BytesIO
+# import numpy as np
 # from scipy.misc import imread
 import os
 import sys
@@ -10,7 +11,7 @@ import sys
 # os.environ['PYSPARK_PYTHON'] = '/shared/anaconda/bin/python'
 
 
-DATA_DIR = '/hdfs/user/lkozinkin/ptv'
+# DATA_DIR = 'ptv/data'
 
 
 # def process_image_pmc(image):
@@ -39,10 +40,28 @@ DATA_DIR = '/hdfs/user/lkozinkin/ptv'
 sc = SparkContext()
 
 
-from pmc import PMC
+# from pmc import PMC
+#
+#
+# print(PMC())
 
 
-print(PMC())
+def process_pmc(rdd):
+    import numpy as np
+    from io import BytesIO
+    from pmc import PMC
+
+    with BytesIO(rdd[1]) as buffer:
+        image = np.load(buffer)
+
+    detector = PMC(ksize=(9, 9), threshold_rel=0.6)
+    points = detector.get_positions(image)
+
+    return points
+
+detected_points = sc.binaryFiles('ptv/data/*.npy').flatMap(process_pmc)
+
+detected_points.saveAsTextFile('ptv/points.txt')
 
 # from scipy.signal import correlate2d
 # import scipy
