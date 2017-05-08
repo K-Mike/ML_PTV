@@ -1,3 +1,4 @@
+# This Python file uses the following encoding: utf-8
 import numpy as np
 import copy
 
@@ -10,10 +11,10 @@ class Relaxation(object):
     Parameters
     ----------
     R_n: float (default=30.0)
-                Neighbours Similarly threshold, every ﬁrst-frame particle preselects its
-                neighbours in the same ﬁrst frame, using also the distance threshold.
+                Neighbours Similarly threshold, every first-frame particle preselects its
+                neighbours in the same first frame, using also the distance threshold.
     R_p: float (default=30.0)
-                Candidate partners threshold, ﬁrst-frame particle preselects its candidate
+                Candidate partners threshold, first-frame particle preselects its candidate
                 partners from the second frame, using the following distance threshold.
     R_c: float (default=5.0)
                 Radius of the relaxation area in which deviation from parallel motion is allowed.

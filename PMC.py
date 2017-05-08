@@ -1,3 +1,4 @@
+# This Python file uses the following encoding: utf-8
 import numpy as np
 from utils import peak_local_max, fft_convolve
 
