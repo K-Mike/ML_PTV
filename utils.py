@@ -1,33 +1,14 @@
+# This Python file uses the following encoding: utf-8
+"""
+Utility functions to eliminate scipy/scikit-image/OpenCV dependencies (rewritten using numpy only)
+"""
 import numpy as np
-# from six import string_types
-# from scipy.ndimage.filters import _min_or_max_filter
-# import scipy.ndimage as ndi
-
-
-def _strided_app(a, L, S):  # Window len = L, Stride len/stepsize = S
-    nrows = ((a.size - L) // S) + 1
-    n = a.strides[0]
-    return np.lib.stride_tricks.as_strided(a, shape=(nrows, L), strides=(S * n, n))
-
-
-def _stride_gen(vector, w_size):
-    assert w_size % 2 == 1
-
-    overlap = int((w_size - 1) / 2)
-    steps_num = len(vector) - w_size + 1
-
-    for idx in range(overlap, 0, -1):
-        yield np.concatenate(([0] * idx, vector[:w_size - idx]))
-
-    for idx in range(steps_num):
-        yield vector[idx:idx + w_size]
-
-    for idx in range(1, overlap + 1):
-        yield np.concatenate((vector[-(w_size - idx):], [0] * idx))
 
 
 def _min_or_max_filter1d(vector, size, axis=0, output=None, mode=None, cval=None, origin=None, is_min=0):
-
+    """
+    C-style 1d maximum filter (minimum not implemented)
+    """
     overlap = int((size - 1) / 2)
     length = vector.shape if type(vector.shape) == int else vector.shape[axis]
     result = np.zeros(shape=output.shape, dtype=output.dtype)
@@ -53,25 +34,11 @@ def _min_or_max_filter1d(vector, size, axis=0, output=None, mode=None, cval=None
             raise ValueError('axis = ' + str(axis) + ' not supported.')
 
     output[:, :] = result[:, :]
-    return
-
-    res = []
-
-    for stride in _stride_gen(vector, size):
-        res.append(np.max(stride))
-
-    # np.median(_strided_app(vector, size, 1), axis=0)
-
-    # if is_min:
-    #     res = np.min(_strided_app(vector, size, 1), axis=1)
-    # else:
-    #     res = np.max(_strided_app(vector, size, 1), axis=1)
-
-    return np.array(res)
 
 
 def _extend_mode_to_code(mode):
-    """Convert an extension mode to the corresponding integer code.
+    """
+    Convert an extension mode to the corresponding integer code.
     """
     if mode == 'nearest':
         return 0
@@ -88,6 +55,9 @@ def _extend_mode_to_code(mode):
 
 
 def _check_axis(axis, rank):
+    """
+    Check axis correctness
+    """
     if axis < 0:
         axis += rank
     if axis < 0 or axis >= rank:
@@ -206,6 +176,9 @@ def _normalize_sequence(input, rank, array_type=None):
 
 
 def _get_output(output, input, shape=None):
+    """
+    Output generator from scipy
+    """
     if shape is None:
         shape = input.shape
     if output is None:
@@ -214,10 +187,6 @@ def _get_output(output, input, shape=None):
     elif type(output) in [type(type), type(np.zeros((4,)).dtype)]:
         output = np.zeros(shape, dtype=output)
         return_value = output
-    # elif type(output) is basestring:
-    #     output = np.typeDict[output]
-    #     output = np.zeros(shape, dtype=output)
-    #     return_value = output
     else:
         if output.shape != shape:
             raise RuntimeError("output shape not correct")
@@ -227,6 +196,9 @@ def _get_output(output, input, shape=None):
 
 def _min_or_max_filter(input, size, footprint, structure, output, mode,
                        cval, origin, minimum):
+    """
+    Generic minimum/maximum filter
+    """
     if structure is None:
         if footprint is None:
             if size is None:
@@ -573,7 +545,9 @@ def _next_regular(target):
 
 
 def _centered(arr, newsize):
-    # Return the center newsize portion of the array.
+    """
+    Return the center newsize portion of the array
+    """
     newsize = np.asarray(newsize)
     currsize = np.array(arr.shape)
     startind = (currsize - newsize) // 2
