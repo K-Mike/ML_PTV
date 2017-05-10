@@ -2,8 +2,6 @@
 from pyspark import SparkContext
 from pyspark import SparkConf
 
-import numpy as np
-
 sc = SparkContext()
 
 
@@ -54,39 +52,10 @@ rdd_frame_a = sc.binaryFiles('ptv/data/*a.npy').map(lambda rdd: process_pmc(rdd,
 
 rdd_frame_b = sc.binaryFiles('ptv/data/*b.npy').map(lambda rdd: process_pmc(rdd, threshold_rel=0.5))
 
-rdd_paired_frames = rdd_frame_a.join(rdd_frame_b).cache()#.repartition(sc.defaultParallelism * 3)
+rdd_paired_frames = rdd_frame_a.join(rdd_frame_b).cache().repartition(sc.defaultParallelism * 3)
 
 res = rdd_paired_frames.map(lambda rdd: process_relaxation(rdd, R_n=60.0, R_p=30.0,
                                                            R_c=10, A=0.3, B=3.0,
                                                            epoch_n=6, max_velocity=20))
 
 res.saveAsPickleFile('ptv/result')
-
-# rdd_test = sc.binaryFiles('ptv/data/*a.npy').map(lambda rdd: rdd[0]).saveAsTextFile('ptv/result')
-
-# for img_label, vector_field in res.toLocalIterator():
-#     path = 'result/' + img_label
-#     np.save(path, vector_field)
-
-
-# test = sc.binaryFiles('ptv/data/*a.npy').map(lambda rdd: rdd[0].rsplit('/', 1)[1][:-6]).saveAsTextFile('ptv/logs')
-# print(test)
-
-# from scipy.signal import correlate2d
-# import scipy
-
-# import os
-# import pip
-#
-# basedir = os.path.abspath(os.path.dirname(__file__))
-# pip.main(['install', 'scipy', '-t', basedir])
-
-# from scipy.misc import imread
-
-# rdd = sc.parallelize(np.arange(10))
-# res = rdd.map(install_packages).distinct().collect()
-# res2 = rdd.map(lambda x: sys.executable).distinct().collect()
-# print(res)
-
-# print(os.environ)
-# print(os.listdir(DATA_DIR))
